@@ -1,0 +1,36 @@
+FROM php:5.6-apache
+
+MAINTAINER Ssas dev <dev@ssas.dev>
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        curl \
+        libmemcached-dev \
+        libz-dev \
+        libpq-dev \
+        libjpeg-dev \
+        libpng12-dev \
+        libfreetype6-dev \
+        libssl-dev \
+        libmcrypt-dev
+
+# Instalamos extensiones requeridas por codeigniter
+RUN docker-php-ext-install mcrypt && \
+    docker-php-ext-install tokenizer
+
+COPY config/php.ini /usr/local/etc/php/
+
+ARG INSTALL_GD=false
+RUN if [ ${INSTALL_GD} = true ]; then \
+    docker-php-ext-install gd && \
+    docker-php-ext-configure gd \
+        --enable-gd-native-ttf \
+        --with-jpeg-dir=/usr/lib \
+        --with-freetype-dir=/usr/include/freetype2 && \
+    docker-php-ext-install gd \
+;fi
+
+ARG INSTALL_ZIP_ARCHIVE=false
+RUN if [ ${INSTALL_ZIP_ARCHIVE} = true ]; then \
+    docker-php-ext-install zip \
+;fi
